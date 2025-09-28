@@ -38,14 +38,13 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      z-index: 1000;
+      z-index: 2000; /* Highest z-index */
       cursor: pointer;
       transition: opacity 0.5s;
     }
     #start-screen h1 { font-size: 3em; text-shadow: 2px 2px #000; }
     #start-screen p { font-size: 1.5em; }
 
-    /* NEW! A container for the sticker and popup to group them */
     #popup-container {
       position: fixed;
       top: 50%;
@@ -53,10 +52,10 @@
       transform: translate(-50%, -50%);
       z-index: 998;
       text-align: center;
-      display: flex; /* NEW! Use flexbox for vertical alignment */
-      flex-direction: column; /* Stack items vertically */
-      align-items: center; /* Center horizontally */
-      gap: 10px; /* Space between elements */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
 
     #popup {
@@ -69,7 +68,6 @@
       color: #fff;
       opacity: 0;
       animation: popupAnim 1s forwards;
-      /* Remove bottom margin, let gap handle spacing */
       margin-top: 0; 
     }
 
@@ -101,6 +99,7 @@
       font-size: 5em;
       animation: rise linear infinite, sway ease-in-out infinite;
       transition: transform 0.3s, opacity 0.2s;
+      z-index: 1500; /* UPDATED! Brings balloons to the very front */
     }
     
     .balloon.popped {
@@ -117,20 +116,17 @@
       0%,100% { transform: translateX(0); }
       50% { transform: translateX(20px); }
     }
-
-    /* UPDATED! Sticker is bigger and responsive */
+    
     #chommu-sticker {
       display: block;
-      position: relative; /* Not absolute anymore, so it flows in flexbox */
+      position: relative;
       z-index: 1000;
-      width: 250px; /* Base size for desktop */
+      width: 250px;
       height: auto;
       animation: wiggle 2s ease-in-out infinite;
       filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.4));
-      /* No margin-bottom here, let gap handle spacing */
     }
 
-    /* Wiggle animation remains the same */
     @keyframes wiggle {
       0%, 100% { transform: rotate(-5deg); }
       50% { transform: rotate(5deg); }
@@ -152,7 +148,7 @@
     
     .pop-emoji {
       position: absolute;
-      z-index: 20;
+      z-index: 1600; /* Higher than balloons */
       font-size: 4em;
       user-select: none;
       animation: popOut 1.5s ease-out forwards;
@@ -176,15 +172,14 @@
       text-shadow: 1px 1px #000;
     }
 
-    /* NEW! Wiggling emojis above the sticker now */
     #central-emojis {
-        display: flex; /* Use flexbox to align them */
+        display: flex;
         justify-content: center;
-        align-items: flex-end; /* Align to the bottom of the line */
-        gap: 8px; /* Space between emojis */
-        margin-bottom: -15px; /* Pull them closer to the sticker */
-        font-size: 3.5em; /* Size of the emojis */
-        z-index: 1001; /* Ensure they are above the sticker */
+        align-items: flex-end;
+        gap: 8px;
+        margin-bottom: -15px;
+        font-size: 3.5em;
+        z-index: 1001;
     }
     
     .wiggle-emoji {
@@ -194,7 +189,7 @@
 
     @keyframes emojiWiggle {
         0%, 100% { transform: translateY(0) rotate(-4deg); }
-        50% { transform: translateY(-8px) rotate(4deg); } /* More prominent wiggle */
+        50% { transform: translateY(-8px) rotate(4deg); }
     }
 
     .wiggle-emoji:nth-of-type(1) { animation-delay: -0.3s; }
@@ -205,7 +200,7 @@
         .cat { font-size: 4em; }
         .balloon { font-size: 4em; }
         #popup { font-size: 2.5em; padding: 20px 30px;}
-        #chommu-sticker { width: 200px; } /* Adjust sticker size for tablets */
+        #chommu-sticker { width: 200px; }
         #central-emojis { font-size: 3em; margin-bottom: -10px;}
         .footer { font-size: 1.5em; }
         #start-screen h1 { font-size: 2.5em; }
@@ -217,7 +212,7 @@
         .cat { font-size: 3em; }
         .balloon { font-size: 3em; }
         #popup { font-size: 1.5em; padding: 15px 20px;}
-        #chommu-sticker { width: 150px; } /* Adjust sticker size for mobile */
+        #chommu-sticker { width: 150px; }
         #central-emojis { font-size: 2.5em; margin-bottom: -5px;}
         .footer { font-size: 1em; }
         #start-screen h1 { font-size: 2em; }
@@ -279,7 +274,16 @@
         
         createInitialConfetti();
 
-        for (let i = 0; i < 6; i++) {
+        // UPDATED! Logic to set balloon count based on screen size
+        let balloonCount = 6; // Default for desktop
+        if (window.innerWidth <= 768) {
+            balloonCount = 4; // for tablets
+        }
+        if (window.innerWidth <= 480) {
+            balloonCount = 3; // for mobile phones
+        }
+
+        for (let i = 0; i < balloonCount; i++) {
             setTimeout(createBalloon, i * 500);
         }
     }
