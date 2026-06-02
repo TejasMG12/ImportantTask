@@ -9,7 +9,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(45deg, #0099ff, #66d9ff, #ff69b4, #ffa500);
+      background: linear-gradient(45deg, #2b0a57, #5a189a, #7b2cbf, #9d4edd, #c77dff);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
       font-family: 'Pacifico', cursive;
@@ -61,7 +61,7 @@
     #popup {
       position: relative;
       font-size: 3em;
-      background: rgba(0,0,0,0.7);
+      background: rgba(25, 8, 48, 0.75);
       padding: 30px 50px;
       border-radius: 20px;
       text-shadow: 2px 2px #000;
@@ -117,19 +117,88 @@
       50% { transform: translateX(20px); }
     }
     
-    #chommu-sticker {
-      display: block;
+    #photo-stage {
       position: relative;
+      width: min(90vw, 900px);
+      height: min(60vh, 520px);
       z-index: 1000;
-      width: 250px;
-      height: auto;
-      animation: wiggle 2s ease-in-out infinite;
-      filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.4));
+      perspective: 1200px;
+      margin-bottom: 20px;
     }
 
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(-5deg); }
-      50% { transform: rotate(5deg); }
+    .memory-photo {
+      position: absolute;
+      width: 180px;
+      height: 240px;
+      transition: transform 0.8s ease, left 0.8s ease, top 0.8s ease, box-shadow 0.4s ease;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .memory-photo .photo-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.8s ease;
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(31, 10, 58, 0.45);
+    }
+
+    .memory-photo.center .photo-inner {
+      box-shadow: 0 18px 36px rgba(10, 0, 25, 0.55);
+    }
+
+    .memory-photo.flipped .photo-inner {
+      transform: rotateY(180deg);
+    }
+
+    .photo-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .photo-front {
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .photo-front img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #e9d8fd;
+    }
+
+    .photo-caption {
+      margin: 6px 0 0;
+      color: #5a189a;
+      font-size: 0.95rem;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    .photo-back {
+      background: linear-gradient(160deg, #4a148c, #7b2cbf);
+      color: #f8f2ff;
+      transform: rotateY(180deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+      text-align: center;
+      font-size: 1rem;
+      font-family: 'Trebuchet MS', sans-serif;
+      line-height: 1.35;
     }
 
     .confetti {
@@ -200,7 +269,9 @@
         .cat { font-size: 4em; }
         .balloon { font-size: 4em; }
         #popup { font-size: 2.5em; padding: 20px 30px;}
-        #chommu-sticker { width: 200px; }
+        #photo-stage { height: min(52vh, 420px); }
+        .memory-photo { width: 150px; height: 200px; }
+        .photo-front img { height: 145px; }
         #central-emojis { font-size: 3em; margin-bottom: -10px;}
         .footer { font-size: 1.5em; }
         #start-screen h1 { font-size: 2.5em; }
@@ -212,7 +283,11 @@
         .cat { font-size: 3em; }
         .balloon { font-size: 3em; }
         #popup { font-size: 1.5em; padding: 15px 20px;}
-        #chommu-sticker { width: 150px; }
+        #photo-stage { width: 95vw; height: min(46vh, 360px); }
+        .memory-photo { width: 118px; height: 164px; }
+        .photo-front img { height: 110px; }
+        .photo-caption { font-size: 0.75rem; }
+        .photo-back { font-size: 0.8rem; padding: 10px; }
         #central-emojis { font-size: 2.5em; margin-bottom: -5px;}
         .footer { font-size: 1em; }
         #start-screen h1 { font-size: 2em; }
@@ -229,12 +304,12 @@
 
   <div id="main-content" style="display: none;">
       <div id="popup-container">
-          <img src="image1.webp" alt="Chommu Sticker" id="chommu-sticker">
-          <div id="central-emojis">
+          <div id="photo-stage" aria-label="Memory photos"></div>
+          <!-- <div id="central-emojis">
               <span class="wiggle-emoji">🕯️</span>
               <span class="wiggle-emoji">🎂</span>
               <span class="wiggle-emoji">🕯️</span>
-          </div>
+          </div> -->
           <div id="popup">
             🎉 Happy Birthday Chommu 🎉
           </div>
@@ -250,15 +325,29 @@
         Your browser does not support the audio tag.
       </audio>
 
-      <div class="footer">
+      <!-- <div class="footer">
         Made with ❤️ and meow vibes 🐾
-      </div>
+      </div> -->
   </div>
 
   <script>
     const startScreen = document.getElementById('start-screen');
     const mainContent = document.getElementById('main-content');
     const song = document.getElementById('birthday-song');
+    const photoStage = document.getElementById('photo-stage');
+    const photosData = [
+      { src: './Pictures/image1.jpeg', caption: 'Best smile', desc: 'A memory worth framing forever.' },
+      { src: './Pictures/image2.jpeg', caption: 'Cute moment', desc: 'One photo, a thousand happy thoughts.' },
+      { src: './Pictures/image3.jpeg', caption: 'Golden vibe', desc: 'You make every day brighter.' },
+      { src: './Pictures/image4.jpeg', caption: 'Iconic look', desc: 'Born to stand out and shine.' },
+      { src: './Pictures/image5.jpeg', caption: 'Pure joy', desc: 'This one always makes me smile.' },
+      { src: './Pictures/image6.jpeg', caption: 'Sweet energy', desc: 'Your laugh is my favorite soundtrack.' },
+      { src: './Pictures/image7.jpeg', caption: 'Lovely frame', desc: 'Every angle is your best angle.' },
+      { src: './Pictures/image8.jpeg', caption: 'Star moment', desc: 'Main character energy always.' },
+      { src: './Pictures/image9.jpeg', caption: 'Happy soul', desc: 'A photo full of warmth.' },
+      { src: './Pictures/image10.jpeg', caption: 'Magic vibe', desc: 'Memories like this are priceless.' },
+      { src: './Pictures/image11.jpeg', caption: 'Favorite shot', desc: 'Saving this in my heart forever.' }
+    ];
 
     function startCelebration() {
         startScreen.style.opacity = '0';
@@ -272,6 +361,7 @@
           document.body.style.filter = 'blur(0)';
         }, 1500);
         
+        initPhotoShuffle();
         createInitialConfetti();
 
         // UPDATED! Logic to set balloon count based on screen size
@@ -286,11 +376,14 @@
         for (let i = 0; i < balloonCount; i++) {
             setTimeout(createBalloon, i * 500);
         }
+
+        // Extra burst inspired by Birthday1: many balloons fly right after surprise.
+        createBalloonBurst(28, 7000);
     }
 
     startScreen.addEventListener('click', startCelebration);
 
-    const colors = ['#ff0', '#f00', '#0f0', '#00f', '#f0f', '#0ff', '#ffa500', '#fff', '#ff69b4', '#8a2be2'];
+    const colors = ['#f3e8ff', '#e9d5ff', '#d8b4fe', '#c084fc', '#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#4c1d95'];
 
     function createConfetti(x, y, count = 20) {
       for (let i = 0; i < count; i++) {
@@ -331,7 +424,123 @@
     });
     
     const catEmojis = ['🐱', '😺', '😸', '😻', '😼', '😽', '🙀', '😹', '🐾'];
-    const balloonColors = ['red', 'yellow', 'green', 'purple', 'orange', 'pink', '#00e1ff', '#ff00aa'];
+    const balloonColors = ['#7e22ce', '#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#6d28d9', '#5b21b6'];
+
+    function randomBetween(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function createPhotoCard(photo, index) {
+      const card = document.createElement('article');
+      card.className = 'memory-photo';
+      card.id = `photo_${index}`;
+      card.innerHTML = `
+        <div class="photo-inner">
+          <div class="photo-face photo-front">
+            <img src="${photo.src}" alt="${photo.caption}">
+            <p class="photo-caption">${photo.caption}</p>
+          </div>
+          <div class="photo-face photo-back">${photo.desc}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => handlePhotoClick(card));
+      return card;
+    }
+
+    function getPhotoRanges() {
+      const stageRect = photoStage.getBoundingClientRect();
+      const sample = photoStage.querySelector('.memory-photo');
+      const cardW = sample ? sample.offsetWidth : 180;
+      const cardH = sample ? sample.offsetHeight : 240;
+      const centerX = Math.floor(stageRect.width / 2 - cardW / 2);
+      const centerY = Math.floor(stageRect.height / 2 - cardH / 2);
+      return {
+        centerX,
+        centerY,
+        left: { x: [0, Math.max(0, centerX - cardW)], y: [0, Math.max(0, stageRect.height - cardH)] },
+        right: { x: [Math.min(stageRect.width - cardW, centerX + cardW), Math.max(0, stageRect.width - cardW)], y: [0, Math.max(0, stageRect.height - cardH)] }
+      };
+    }
+
+    function placePhoto(card, x, y, rotateDeg, scale = 1) {
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+      card.style.transform = `rotate(${rotateDeg}deg) scale(${scale})`;
+      card.classList.remove('flipped');
+      card.classList.remove('center');
+    }
+
+    function sortPhotos(centerIndex) {
+      const cards = [...photoStage.querySelectorAll('.memory-photo')];
+      if (!cards.length) return;
+      const ranges = getPhotoRanges();
+      cards.forEach((card) => {
+        card.classList.remove('center');
+        card.classList.remove('flipped');
+      });
+
+      const centerCard = cards[centerIndex];
+      centerCard.classList.add('center');
+      placePhoto(centerCard, ranges.centerX, ranges.centerY, 0, 1.08);
+
+      const rest = cards.filter((_, i) => i !== centerIndex);
+      const leftCount = Math.ceil(rest.length / 2);
+      rest.slice(0, leftCount).forEach((card) => {
+        placePhoto(
+          card,
+          randomBetween(ranges.left.x[0], ranges.left.x[1]),
+          randomBetween(ranges.left.y[0], ranges.left.y[1]),
+          randomBetween(-35, 35)
+        );
+      });
+
+      rest.slice(leftCount).forEach((card) => {
+        placePhoto(
+          card,
+          randomBetween(ranges.right.x[0], ranges.right.x[1]),
+          randomBetween(ranges.right.y[0], ranges.right.y[1]),
+          randomBetween(-35, 35)
+        );
+      });
+    }
+
+    function getCurrentCenterIndex(cards) {
+      return cards.findIndex((card) => card.classList.contains('center'));
+    }
+
+    function getRandomCenterIndex(cards) {
+      if (!cards.length) return -1;
+      const current = getCurrentCenterIndex(cards);
+      if (cards.length === 1) return 0;
+      let next = randomBetween(0, cards.length - 1);
+      while (next === current) {
+        next = randomBetween(0, cards.length - 1);
+      }
+      return next;
+    }
+
+    function handlePhotoClick(card) {
+      const cards = [...photoStage.querySelectorAll('.memory-photo')];
+      if (!cards.length) return;
+      const randomCenter = getRandomCenterIndex(cards);
+      if (randomCenter >= 0) {
+        sortPhotos(randomCenter);
+      }
+    }
+
+    function initPhotoShuffle() {
+      photoStage.innerHTML = '';
+      photosData.forEach((photo, index) => {
+        photoStage.appendChild(createPhotoCard(photo, index));
+      });
+      sortPhotos(randomBetween(0, photosData.length - 1));
+    }
+
+    function createBalloonBurst(total = 24, spreadMs = 6000) {
+      for (let i = 0; i < total; i++) {
+        setTimeout(createBalloon, randomBetween(0, spreadMs));
+      }
+    }
 
     function createPopEffect(x, y) {
         const catEl = document.createElement('div');
@@ -389,6 +598,14 @@
 
         mainContent.appendChild(balloon);
     }
+
+    window.addEventListener('resize', () => {
+      if (photoStage.children.length) {
+        const cards = [...photoStage.querySelectorAll('.memory-photo')];
+        const centerIndex = cards.findIndex((card) => card.classList.contains('center'));
+        sortPhotos(centerIndex >= 0 ? centerIndex : 0);
+      }
+    });
   </script>
 </body>
 </html>
