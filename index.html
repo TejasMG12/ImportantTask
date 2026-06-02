@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happy Birthday Chommu 🎂</title>
+  <title>Happy Birthday Dumbass 🎂</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(45deg, #2b0a57, #5a189a, #7b2cbf, #9d4edd, #c77dff);
+      background: linear-gradient(45deg, #210447, #52089d, #7b2cbf, #9d4edd, #c77dff);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
       font-family: 'Pacifico', cursive;
@@ -96,10 +96,15 @@
 
     .balloon {
       position: absolute;
-      font-size: 5em;
+      width: 52px;
+      height: 96px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
       animation: rise linear infinite, sway ease-in-out infinite;
       transition: transform 0.3s, opacity 0.2s;
       z-index: 1500; /* UPDATED! Brings balloons to the very front */
+      pointer-events: auto;
     }
     
     .balloon.popped {
@@ -114,7 +119,26 @@
 
     @keyframes sway {
       0%,100% { transform: translateX(0); }
-      50% { transform: translateX(20px); }
+      50% { transform: translateX(10px); }
+    }
+
+    .balloon-border {
+      position: fixed;
+      top: 100%;
+      left: -50%;
+      width: 400%;
+      /* opacity: 0.62; */
+      z-index: 1400;
+      pointer-events: none;
+    }
+
+    .balloon-border.rising {
+      animation: borderRise 12s linear forwards;
+    }
+
+    @keyframes borderRise {
+      0% { top: 100%; }
+      100% { top: -520px; }
     }
     
     #photo-stage {
@@ -267,7 +291,7 @@
     
     @media (max-width: 768px) {
         .cat { font-size: 4em; }
-        .balloon { font-size: 4em; }
+        .balloon { width: 46px; height: 85px; }
         #popup { font-size: 2.5em; padding: 20px 30px;}
         #photo-stage { height: min(52vh, 420px); }
         .memory-photo { width: 150px; height: 200px; }
@@ -281,7 +305,7 @@
 
     @media (max-width: 480px) {
         .cat { font-size: 3em; }
-        .balloon { font-size: 3em; }
+        .balloon { width: 38px; height: 70px; }
         #popup { font-size: 1.5em; padding: 15px 20px;}
         #photo-stage { width: 95vw; height: min(46vh, 360px); }
         .memory-photo { width: 118px; height: 164px; }
@@ -303,6 +327,7 @@
   </div>
 
   <div id="main-content" style="display: none;">
+      <img src="./Balloons/Balloon-Border.png" alt="" class="balloon-border" id="balloon-border">
       <div id="popup-container">
           <div id="photo-stage" aria-label="Memory photos"></div>
           <!-- <div id="central-emojis">
@@ -311,7 +336,7 @@
               <span class="wiggle-emoji">🕯️</span>
           </div> -->
           <div id="popup">
-            🎉 Happy Birthday Chommu 🎉
+            🎉 Happy Birthday Dumbass 🎉
           </div>
       </div>
       
@@ -335,6 +360,7 @@
     const mainContent = document.getElementById('main-content');
     const song = document.getElementById('birthday-song');
     const photoStage = document.getElementById('photo-stage');
+    const balloonBorder = document.getElementById('balloon-border');
     const photosData = [
       { src: './Pictures/image1.jpeg', caption: 'Best smile', desc: 'A memory worth framing forever.' },
       { src: './Pictures/image2.jpeg', caption: 'Cute moment', desc: 'One photo, a thousand happy thoughts.' },
@@ -348,6 +374,7 @@
       { src: './Pictures/image10.jpeg', caption: 'Magic vibe', desc: 'Memories like this are priceless.' },
       { src: './Pictures/image11.jpeg', caption: 'Favorite shot', desc: 'Saving this in my heart forever.' }
     ];
+    let currentCenterIndex = 0;
 
     function startCelebration() {
         startScreen.style.opacity = '0';
@@ -364,21 +391,22 @@
         initPhotoShuffle();
         createInitialConfetti();
 
-        // UPDATED! Logic to set balloon count based on screen size
-        let balloonCount = 6; // Default for desktop
+        // Initial set of balloons based on screen size (kept light)
+        let balloonCount = 3;
         if (window.innerWidth <= 768) {
-            balloonCount = 4; // for tablets
+            balloonCount = 2;
         }
         if (window.innerWidth <= 480) {
-            balloonCount = 3; // for mobile phones
+            balloonCount = 2;
         }
 
         for (let i = 0; i < balloonCount; i++) {
-            setTimeout(createBalloon, i * 500);
+            setTimeout(createBalloon, i * 1200);
         }
 
-        // Extra burst inspired by Birthday1: many balloons fly right after surprise.
-        createBalloonBurst(28, 7000);
+        startBalloonBorderRise();
+        // Reduced count while keeping the Birthday1-like flying effect.
+        launchBalloonShow();
     }
 
     startScreen.addEventListener('click', startCelebration);
@@ -424,7 +452,15 @@
     });
     
     const catEmojis = ['🐱', '😺', '😸', '😻', '😼', '😽', '🙀', '😹', '🐾'];
-    const balloonColors = ['#7e22ce', '#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#6d28d9', '#5b21b6'];
+    const balloonImages = [
+      './Balloons/b1.png',
+      './Balloons/b2.png',
+      './Balloons/b3.png',
+      './Balloons/b4.png',
+      './Balloons/b5.png',
+      './Balloons/b6.png',
+      './Balloons/b7.png'
+    ];
 
     function randomBetween(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -473,17 +509,18 @@
     function sortPhotos(centerIndex) {
       const cards = [...photoStage.querySelectorAll('.memory-photo')];
       if (!cards.length) return;
+      const safeCenter = ((centerIndex % cards.length) + cards.length) % cards.length;
       const ranges = getPhotoRanges();
       cards.forEach((card) => {
         card.classList.remove('center');
         card.classList.remove('flipped');
       });
 
-      const centerCard = cards[centerIndex];
+      const centerCard = cards[safeCenter];
       centerCard.classList.add('center');
       placePhoto(centerCard, ranges.centerX, ranges.centerY, 0, 1.08);
 
-      const rest = cards.filter((_, i) => i !== centerIndex);
+      const rest = cards.filter((_, i) => i !== safeCenter);
       const leftCount = Math.ceil(rest.length / 2);
       rest.slice(0, leftCount).forEach((card) => {
         placePhoto(
@@ -502,30 +539,22 @@
           randomBetween(-35, 35)
         );
       });
+      currentCenterIndex = safeCenter;
     }
 
-    function getCurrentCenterIndex(cards) {
-      return cards.findIndex((card) => card.classList.contains('center'));
-    }
-
-    function getRandomCenterIndex(cards) {
-      if (!cards.length) return -1;
-      const current = getCurrentCenterIndex(cards);
-      if (cards.length === 1) return 0;
-      let next = randomBetween(0, cards.length - 1);
-      while (next === current) {
-        next = randomBetween(0, cards.length - 1);
-      }
-      return next;
+    function getNextCenterIndex() {
+      if (!photosData.length) return 0;
+      return (currentCenterIndex + 1) % photosData.length;
     }
 
     function handlePhotoClick(card) {
       const cards = [...photoStage.querySelectorAll('.memory-photo')];
       if (!cards.length) return;
-      const randomCenter = getRandomCenterIndex(cards);
-      if (randomCenter >= 0) {
-        sortPhotos(randomCenter);
+      const clickedIndex = cards.indexOf(card);
+      if (clickedIndex >= 0) {
+        currentCenterIndex = clickedIndex;
       }
+      sortPhotos(getNextCenterIndex());
     }
 
     function initPhotoShuffle() {
@@ -533,13 +562,24 @@
       photosData.forEach((photo, index) => {
         photoStage.appendChild(createPhotoCard(photo, index));
       });
-      sortPhotos(randomBetween(0, photosData.length - 1));
+      sortPhotos(0);
     }
 
     function createBalloonBurst(total = 24, spreadMs = 6000) {
       for (let i = 0; i < total; i++) {
         setTimeout(createBalloon, randomBetween(0, spreadMs));
       }
+    }
+
+    function startBalloonBorderRise() {
+      balloonBorder.classList.remove('rising');
+      void balloonBorder.offsetWidth;
+      balloonBorder.classList.add('rising');
+    }
+
+    function launchBalloonShow() {
+      createBalloonBurst(4, 4000);
+      setTimeout(() => createBalloonBurst(3, 3500), 4500);
     }
 
     function createPopEffect(x, y) {
@@ -571,15 +611,14 @@
         const balloon = document.createElement('div');
         balloon.classList.add('balloon');
 
-        const color = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+        const balloonImage = balloonImages[Math.floor(Math.random() * balloonImages.length)];
         const leftPosition = Math.random() * 90 + 5;
-        const riseDuration = Math.random() * 5 + 7;
-        const swayDuration = Math.random() * 2 + 3;
+        const riseDuration = Math.random() * 6 + 12;
+        const swayDuration = Math.random() * 3 + 6;
 
-        balloon.style.color = color;
+        balloon.style.backgroundImage = `url('${balloonImage}')`;
         balloon.style.left = leftPosition + 'vw';
         balloon.style.animationDuration = `${riseDuration}s, ${swayDuration}s`;
-        balloon.innerText = '🎈';
 
         balloon.addEventListener('click', () => {
             if (!balloon.classList.contains('popped')) {
@@ -591,7 +630,7 @@
 
                 setTimeout(() => {
                     balloon.remove();
-                    setTimeout(createBalloon, 200); 
+                    setTimeout(createBalloon, 3500); 
                 }, 2000);
             }
         }, { once: true });
